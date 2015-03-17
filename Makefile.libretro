@@ -218,25 +218,30 @@ else ifeq ($(platform), ios)
 
 # rpi2
 ifeq ($(platform), rpi2)
-	TARGETLIB := $(TARGET)_libretro.so
+	armplatform := 1
+	TARGETLIB := $(TARGET_NAME)_libretro.so
 	TARGETOS=linux
 	fpic := -fPIC
 	SHARED := -shared -Wl,--version-script=src/osd/retro/link.T -Wl,--no-undefined
 	CCOMFLAGS += $(fpic) -mthumb-interwork -funroll-loops -fsigned-char -finline -fno-common -fno-builtin -fweb -frename-registers -falign-functions=16
-	PLATCFLAGS += $(fpic) -DALIGN_INTS -DALIGN_SHORTS -DSDLMAME_ARM  -DHAVE_GL -fstrict-aliasing -fno-merge-constants
+	PLATCFLAGS += $(fpic) -DALIGN_INTS -DALIGN_SHORTS -DSDLMAME_ARM -fstrict-aliasing -fno-merge-constants
 	FORCE_DRC_C_BACKEND = 1
-	LDFLAGS +=  $(fpic) $(SHARED)
+	LDFLAGS += -Wl,--no-as-needed $(fpic) $(SHARED)
+	NATIVELD = g++
+	NATIVELDFLAGS = -Wl,--warn-common -lstdc++ -Wl,--no-undefined
 	NATIVECC = g++
 	NATIVECFLAGS = -std=gnu99
-	BASELIBS +=  -lpthread
+	CC_AS = gcc
 	CC = g++
 	AR = @ar
 	LD = g++
-	CCOMFLAGS += $(PLATCFLAGS)
-	LIBS += -lstdc++ -lpthread -ldl  -lGLESv2 -L/opt/vc/lib
+	CCOMFLAGS += $(PLATCFLAGS) -ffast-math
+	PLATCFLAGS += -marm
+	HAVE_NEON = 1
+	PLATCFLAGS += -DARM
+	LIBS += -lstdc++ -lpthread -ldl -lGLESv2 -L/opt/vc/lib
 	INCPATH += -I/opt/vc/include
 	GLES = 1
-	HAVE_NEON = 1
 
 # QNX
 else ifeq ($(platform), qnx)
